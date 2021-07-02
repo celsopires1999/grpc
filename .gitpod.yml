@@ -1,8 +1,5 @@
 tasks:
-  - init: |
-      go build
-    command: |
-      ./mycli --help
+
 vscode:
   extensions:
     - golang.go
