@@ -16,7 +16,7 @@ func NewUserService() *UserService {
 	return &UserService{}
 }
 
-func (*UserService) AddUserStream(req *pb.User, stream pb.UserService_AddUserStreamServer) error {
+func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVerboseServer) error {
 	stream.Send(&pb.UserResultStream{
 		Status: "Init",
 		User:	&pb.User{},

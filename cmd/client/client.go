@@ -44,7 +44,7 @@ func AddUserVerbose(client pb.UserServiceClient) {
 		Email: "j@j.com",
 	}
 
-	responseStream, err := client.AddUserStream(context.Background(), req)
+	responseStream, err := client.AddUserVerbose(context.Background(), req)
 	if err != nil {
 		log.Fatalf("Could not make gRPC request: %v", err)
 	}
