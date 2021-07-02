@@ -1,4 +1,7 @@
 tasks:
+- command: sudo apt install -y protobuf-compiler
+- command: go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc
+- command: PATH="/go/bin:$PATH"
 
 vscode:
   extensions:

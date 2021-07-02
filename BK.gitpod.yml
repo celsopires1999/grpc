@@ -1,0 +1,5 @@
+tasks:
+
+vscode:
+  extensions:
+    - golang.go
