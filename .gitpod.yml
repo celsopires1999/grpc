@@ -1,6 +1,7 @@
 tasks:
 - init: sudo apt install -y protobuf-compiler
 - init: go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc
+- init: go get github.com/ktr0731/evans
 
 vscode:
   extensions:
