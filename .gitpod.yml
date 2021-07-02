@@ -1,3 +1,5 @@
-image: golang:1.6
-ports:
-- port: 3000
+tasks:
+
+vscode:
+  extensions:
+    - golang.go
