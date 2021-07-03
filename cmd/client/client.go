@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"io"
+	"log"
+	"time"
+
 	"github.com/celsopires1999/grpc/pb"
+
 	// "google.golang.org/genproto/googleapis/cloud/bigquery/connection/v1"
 	"google.golang.org/grpc"
 )
@@ -19,7 +22,8 @@ func main()  {
 
 	client := pb.NewUserServiceClient(connection)
 	// AddUser(client)
-	AddUserVerbose(client)
+	// AddUserVerbose(client)
+	AddUsers(client)
 }
 
 func AddUser(client pb.UserServiceClient) {
@@ -59,4 +63,56 @@ func AddUserVerbose(client pb.UserServiceClient) {
 		}
 		fmt.Println("Status:", stream.Status, " - ", stream.GetUser())
 	}
+}
+
+func AddUsers(client pb.UserServiceClient) {
+	reqs := []*pb.User{
+		&pb.User{
+			Id: "j1",
+			Name: "João 1",
+			Email: "j1@j.com",
+		},
+		&pb.User{
+			Id: "j2",
+			Name: "João 2",
+			Email: "j2@j.com",
+		},
+		&pb.User{
+			Id: "j3",
+			Name: "João 3",
+			Email: "j3@j.com",
+		},
+		&pb.User{
+			Id: "j4",
+			Name: "João 4",
+			Email: "j4@j.com",
+		},
+		&pb.User{
+			Id: "j5",
+			Name: "João 5",
+			Email: "j5@j.com",
+		},
+		&pb.User{
+			Id: "j6",
+			Name: "João 6",
+			Email: "j6@j.com",
+		},										
+	}
+
+	stream, err := client.AddUsers(context.Background())
+	if err != nil {
+		log.Fatalf("Error creating request: %v", err)
+	}
+
+	for _, req := range reqs {
+		stream.Send(req)
+		time.Sleep((time.Second * 3))
+	}
+
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error receiving response: %v", err)
+	}
+
+	fmt.Println(res)
 }

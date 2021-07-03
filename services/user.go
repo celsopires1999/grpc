@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
+	"io"
 
 	"github.com/celsopires1999/grpc/pb"
 )
@@ -66,4 +68,27 @@ func (*UserService) AddUser(ctx context.Context, req *pb.User) (*pb.User, error)
 		Name: req.GetName(),
 		Email: req.GetEmail(),
 	}, nil
+}
+
+func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
+	users := []*pb.User{}
+
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&pb.Users{
+				User: users,
+			})
+		}
+		if err != nil {
+			log.Fatalf("Error receiving stream: %v", err)
+		}
+
+		users = append(users, &pb.User{
+			Id:		req.GetId(),
+			Name:	req.GetName(),
+			Email: 	req.GetEmail(),
+		})
+		fmt.Println("Adding", req.GetName())
+	}
 }
