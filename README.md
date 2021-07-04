@@ -15,4 +15,3 @@ docker run -it -v $(pwd):/go/src  celsopires/grpc
 
 Open another terminal
 docker exec -it hardcore_greider bash
-
