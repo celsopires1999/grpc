@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func main()  {
+func main() {
 	connection, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Could not connect to gRPC Server: %v", err)
@@ -23,13 +23,14 @@ func main()  {
 	client := pb.NewUserServiceClient(connection)
 	// AddUser(client)
 	// AddUserVerbose(client)
-	AddUsers(client)
+	// AddUsers(client)
+	AddUserStreamBoth(client)
 }
 
 func AddUser(client pb.UserServiceClient) {
 	req := &pb.User{
-		Id: "0",
-		Name: "João",
+		Id:    "0",
+		Name:  "João",
 		Email: "j@j.com",
 	}
 
@@ -43,8 +44,8 @@ func AddUser(client pb.UserServiceClient) {
 
 func AddUserVerbose(client pb.UserServiceClient) {
 	req := &pb.User{
-		Id: "0",
-		Name: "João",
+		Id:    "0",
+		Name:  "João",
 		Email: "j@j.com",
 	}
 
@@ -68,35 +69,35 @@ func AddUserVerbose(client pb.UserServiceClient) {
 func AddUsers(client pb.UserServiceClient) {
 	reqs := []*pb.User{
 		&pb.User{
-			Id: "j1",
-			Name: "João 1",
+			Id:    "j1",
+			Name:  "João 1",
 			Email: "j1@j.com",
 		},
 		&pb.User{
-			Id: "j2",
-			Name: "João 2",
+			Id:    "j2",
+			Name:  "João 2",
 			Email: "j2@j.com",
 		},
 		&pb.User{
-			Id: "j3",
-			Name: "João 3",
+			Id:    "j3",
+			Name:  "João 3",
 			Email: "j3@j.com",
 		},
 		&pb.User{
-			Id: "j4",
-			Name: "João 4",
+			Id:    "j4",
+			Name:  "João 4",
 			Email: "j4@j.com",
 		},
 		&pb.User{
-			Id: "j5",
-			Name: "João 5",
+			Id:    "j5",
+			Name:  "João 5",
 			Email: "j5@j.com",
 		},
 		&pb.User{
-			Id: "j6",
-			Name: "João 6",
+			Id:    "j6",
+			Name:  "João 6",
 			Email: "j6@j.com",
-		},										
+		},
 	}
 
 	stream, err := client.AddUsers(context.Background())
@@ -115,4 +116,74 @@ func AddUsers(client pb.UserServiceClient) {
 	}
 
 	fmt.Println(res)
+}
+
+func AddUserStreamBoth(client pb.UserServiceClient) {
+
+	stream, err := client.AddUserStreamBoth(context.Background())
+	if err != nil {
+		log.Fatalf("Error creating request: %v", err)
+	}
+
+	reqs := []*pb.User{
+		&pb.User{
+			Id:    "j1",
+			Name:  "João 1",
+			Email: "j1@j.com",
+		},
+		&pb.User{
+			Id:    "j2",
+			Name:  "João 2",
+			Email: "j2@j.com",
+		},
+		&pb.User{
+			Id:    "j3",
+			Name:  "João 3",
+			Email: "j3@j.com",
+		},
+		&pb.User{
+			Id:    "j4",
+			Name:  "João 4",
+			Email: "j4@j.com",
+		},
+		&pb.User{
+			Id:    "j5",
+			Name:  "João 5",
+			Email: "j5@j.com",
+		},
+		&pb.User{
+			Id:    "j6",
+			Name:  "João 6",
+			Email: "j6@j.com",
+		},
+	}
+
+	wait := make(chan int)
+
+	go func() {
+		for _, req := range reqs {
+			fmt.Println("Sending user: ", req.Name)
+			stream.Send(req)
+			time.Sleep(time.Second * 3)
+		}
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Error receiving data: %v", err)
+				break
+			}
+			fmt.Printf("Receiving user %v with status: %v\n", res.GetUser().GetName(), res.GetStatus())
+		}
+		close(wait)
+	}()
+
+	<-wait
+
 }

@@ -13,11 +13,11 @@ import (
 func main() {
 	lis, err := net.Listen("tcp", "localhost:50051")
 	if err != nil {
-		log.Fatalf("Could not connect: %v, err")
+		log.Fatalf("Could not connect: %v", err)
 	}
 
 	grpServer := grpc.NewServer()
-	pb.RegisterUserServiceServer(grpServer,  services.NewUserService())
+	pb.RegisterUserServiceServer(grpServer, services.NewUserService())
 	reflection.Register(grpServer)
 
 	if err := grpServer.Serve(lis); err != nil {

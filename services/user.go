@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"time"
-	"io"
 
 	"github.com/celsopires1999/grpc/pb"
 )
@@ -21,23 +21,23 @@ func NewUserService() *UserService {
 func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVerboseServer) error {
 	stream.Send(&pb.UserResultStream{
 		Status: "Init",
-		User:	&pb.User{},
+		User:   &pb.User{},
 	})
 
 	time.Sleep(time.Second * 3)
 
 	stream.Send(&pb.UserResultStream{
 		Status: "Inserting",
-		User:	&pb.User{},
+		User:   &pb.User{},
 	})
 
 	time.Sleep(time.Second * 3)
 
 	stream.Send(&pb.UserResultStream{
 		Status: "User has been inserted",
-		User:	&pb.User{
-			Id: "123",
-			Name: req.GetName(),
+		User: &pb.User{
+			Id:    "123",
+			Name:  req.GetName(),
 			Email: req.GetEmail(),
 		},
 	})
@@ -46,9 +46,9 @@ func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVe
 
 	stream.Send(&pb.UserResultStream{
 		Status: "Completed",
-		User:	&pb.User{
-			Id: "123",
-			Name: req.GetName(),
+		User: &pb.User{
+			Id:    "123",
+			Name:  req.GetName(),
 			Email: req.GetEmail(),
 		},
 	})
@@ -64,8 +64,8 @@ func (*UserService) AddUser(ctx context.Context, req *pb.User) (*pb.User, error)
 	fmt.Println(req.Name)
 
 	return &pb.User{
-		Id: "123",
-		Name: req.GetName(),
+		Id:    "123",
+		Name:  req.GetName(),
 		Email: req.GetEmail(),
 	}, nil
 }
@@ -85,10 +85,31 @@ func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 		}
 
 		users = append(users, &pb.User{
-			Id:		req.GetId(),
-			Name:	req.GetName(),
-			Email: 	req.GetEmail(),
+			Id:    req.GetId(),
+			Name:  req.GetName(),
+			Email: req.GetEmail(),
 		})
 		fmt.Println("Adding", req.GetName())
+	}
+}
+
+func (*UserService) AddUserStreamBoth(stream pb.UserService_AddUserStreamBothServer) error {
+
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("Error receiving stream from the client: %v", err)
+		}
+
+		err = stream.Send(&pb.UserResultStream{
+			Status: "Added",
+			User:   req,
+		})
+		if err != nil {
+			log.Fatalf("Error sending stream to the client: %v", err)
+		}
 	}
 }
